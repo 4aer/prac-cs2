@@ -4,7 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # This allows React to connect to Flask
 
-# Sample data
+# Linked list muna for database
 tasks = []
 
 # GET all tasks
