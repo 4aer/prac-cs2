@@ -5,10 +5,7 @@ app = Flask(__name__)
 CORS(app)  # This allows React to connect to Flask
 
 # Sample data
-tasks = [
-    {"id": 1, "name": "Buy groceries", "done": False},
-    {"id": 2, "name": "Finish homework", "done": False},
-]
+tasks = []
 
 # GET all tasks
 @app.route('/api/tasks', methods=['GET'])
