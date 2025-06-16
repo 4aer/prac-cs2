@@ -1,32 +1,47 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # This allows React to connect to Flask
 
-# linked list muna for data storage
-tasks = []
+# Sample data
+tasks = [
+    {"id": 1, "name": "Buy groceries", "done": False},
+    {"id": 2, "name": "Finish homework", "done": False},
+]
 
-@app.route('/')
-def index():
-    return render_template('index.html', tasks=tasks)
+# GET all tasks
+@app.route('/api/tasks', methods=['GET'])
+def get_tasks():
+    return jsonify(tasks)
 
-@app.route('/add', methods=['POST'])
-def add():
-    task = request.form.get('task')
-    if task:
-        tasks.append({"name": task, "done": False})
-    return redirect(url_for('index'))
+# POST a new task
+@app.route('/api/tasks', methods=['POST'])
+def add_task():
+    data = request.get_json()
+    new_task = {
+        "id": len(tasks) + 1,
+        "name": data['name'],
+        "done": False
+    }
+    tasks.append(new_task)
+    return jsonify(new_task), 201
 
-@app.route('/complete/<int:task_id>')
-def complete(task_id):
-    if 0 <= task_id < len(tasks):
-        tasks[task_id]['done'] = True
-    return redirect(url_for('index'))
+# PATCH to mark as done
+@app.route('/api/tasks/<int:task_id>', methods=['PATCH'])
+def complete_task(task_id):
+    for task in tasks:
+        if task['id'] == task_id:
+            task['done'] = True
+            return jsonify(task)
+    return jsonify({"error": "Task not found"}), 404
 
-@app.route('/delete/<int:task_id>')
-def delete(task_id):
-    if 0 <= task_id < len(tasks):
-        tasks.pop(task_id)
-    return redirect(url_for('index'))
+# DELETE a task
+@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    global tasks
+    tasks = [task for task in tasks if task['id'] != task_id]
+    return jsonify({"result": "success"})
 
 if __name__ == '__main__':
     app.run(debug=True)
